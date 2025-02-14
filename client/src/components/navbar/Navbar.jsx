@@ -1,0 +1,83 @@
+import { Link } from "react-router-dom";
+const Navbar = () => {
+    return (
+      <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: 'green' }}>
+        <div className="container-fluid">
+          {/* Navbar Brand */}
+          <a className="navbar-brand text-white" href="#">Navbar</a>
+  
+          {/* Toggler Button */}
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+  
+          {/* Collapse Content */}
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            {/* Left Navigation Links */}
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item">
+                <a className="nav-link active text-white" aria-current="page" href="#">Home</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link text-white" href="#">Contact us</a>
+              </li>
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle text-white"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Agriculture
+                </a>
+                <ul className="dropdown-menu">
+                  <li><a className="dropdown-item" href="#">Crop</a></li>
+                  <li><a className="dropdown-item" href="#">Livestock</a></li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li><a className="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link text-white" href="#">About</a>
+              </li>
+            </ul>
+  
+            {/* Centered Search Form */}
+            <form className="d-flex order-lg-0 ms-auto me-auto" role="search">
+              <input
+                className="form-control me-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+                style={{ backgroundColor: '#fff', color: '#000' }}
+              />
+              <button className="btn btn-outline-light" type="submit">Search</button>
+            </form>
+  
+            {/* Right Side Sign Up/Sign In Links */}
+            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li className="nav-item">
+                <Link to="/register" className="nav-link text-white g-3 " >
+                  <button className="btn btn-outline-light" type="button">Sign up</button></Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/login" className="nav-link text-white g-3 ">
+                  <button className="btn btn-outline-light" type="button">Sign in</button></Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    );
+  };
+  
+  export default Navbar;

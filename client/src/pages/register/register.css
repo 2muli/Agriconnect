@@ -1,0 +1,43 @@
+/* General Styles */
+.card-registration .select-input.form-control[readonly]:not([disabled]) {
+    font-size: 1rem;
+    line-height: 2.15;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+  }
+  
+  .card-registration .select-arrow {
+    top: 13px;
+  }
+  
+  /* Center the Card */
+  section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .card-registration {
+    max-width: 700px;
+    margin: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .card-registration .col-xl-6.d-none {
+      display: block; /* Show the image on smaller screens */
+    }
+  
+    .card-registration .row.g-0 {
+      flex-direction: column;
+    }
+  
+    .card-registration img {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-top-right-radius: 0.25rem;
+      border-bottom-right-radius: 0.25rem;
+    }
+  }
