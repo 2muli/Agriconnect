@@ -3,10 +3,6 @@ const Navbar = () => {
     return (
       <nav className="navbar navbar-expand-lg sticky-top" style={{ backgroundColor: 'green' }}>
         <div className="container-fluid">
-          {/* Navbar Brand */}
-          <a className="navbar-brand text-white" href="#">Navbar</a>
-  
-          {/* Toggler Button */}
           <button
             className="navbar-toggler"
             type="button"
@@ -24,13 +20,10 @@ const Navbar = () => {
             {/* Left Navigation Links */}
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <a className="nav-link active text-white" aria-current="page" href="#">Home</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link text-white" href="#">Contact us</a>
+                <Link to="/" className="nav-link active text-white" aria-current="page">Home</Link>
               </li>
               <li className="nav-item dropdown">
-                <a
+                <Link
                   className="nav-link dropdown-toggle text-white"
                   href="#"
                   role="button"
@@ -38,16 +31,25 @@ const Navbar = () => {
                   aria-expanded="false"
                 >
                   Agriculture
-                </a>
+                </Link>
                 <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">Crop</a></li>
-                  <li><a className="dropdown-item" href="#">Livestock</a></li>
+                  <li><Link className="dropdown-item" href="#">Crop</Link></li>
+                  <li><Link className="dropdown-item" href="#">Livestock</Link></li>
                   <li><hr className="dropdown-divider" /></li>
-                  <li><a className="dropdown-item" href="#">Something else here</a></li>
+                  <li><Link className="dropdown-item" href="#">Something else here</Link></li>
                 </ul>
               </li>
               <li className="nav-item">
-                <a className="nav-link text-white" href="#">About</a>
+                <Link to="/contact" className="nav-link text-white">Contact us</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/help" className="nav-link text-white" >Help</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/about" className="nav-link text-white">About</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/faq" className="nav-link text-white">FQAs</Link>
               </li>
             </ul>
   

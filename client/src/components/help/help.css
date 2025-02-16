@@ -1,0 +1,92 @@
+/* Ensure the body is fully scrollable */
+.help-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #E6F4E6;
+    color: #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: none; /* Remove height limit */
+}
+.help-container::-webkit-scrollbar{
+    display: none;
+}
+
+/* Main Title Styling */
+.help-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #007B45;
+}
+
+/* Section Styling */
+.help-section {
+    display: block;
+    margin-bottom: 200px;
+    padding: 10px;
+    border-bottom: 1px solid #D1EAD6;
+}
+
+/* Header Styling */
+.help-header {
+    text-align: left;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #00563F;
+}
+
+/* Subheader Styling */
+.help-subheader {
+    font-size: 1.2rem;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #007B45;
+}
+
+/* Content Styling */
+.help-content {
+    text-align: left;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+
+/* Ordered List Styling */
+.help-content ol {
+    padding-left: 20px;
+}
+
+/* Paragraph Styling */
+.help-content p {
+    margin-bottom: 10px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .help-container {
+        width: 90%;
+        padding: 15px;
+        margin-bottom: 80px; /* Increased bottom margin for better spacing on mobile */
+    }
+   .help-section{
+    margin-bottom: 100px;
+   }
+    .help-title {
+        font-size: 1.8rem;
+    }
+
+    .help-header {
+        font-size: 1.4rem;
+    }
+
+    .help-subheader {
+        font-size: 1.1rem;
+    }
+
+    .help-content p, 
+    .help-content ol li {
+        font-size: 1rem;
+    }
+}

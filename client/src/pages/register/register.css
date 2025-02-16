@@ -28,6 +28,7 @@
   @media (max-width: 768px) {
     .card-registration .col-xl-6.d-none {
       display: block; /* Show the image on smaller screens */
+      margin-bottom: 20px;
     }
   
     .card-registration .row.g-0 {

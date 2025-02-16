@@ -1,0 +1,50 @@
+/* General Styling */
+.help-section1 {
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: white; /* Ensures text is white */
+    font-family: 'Arial', sans-serif;
+    background: rgb(85, 119, 35); /* Transparent background */
+    display: block;
+}
+
+/* Heading */
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* FAQ Styling */
+details {
+    display: block;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.2); /* Slight transparency */
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+summary {
+    font-size: 1.5rem;
+    font-weight: bold;
+    outline: none;
+    bottom: "20px";
+}
+
+details p {
+    margin-top: 10px;
+    font-size: 1.3rem;
+    padding-left: 10px;
+    text-align: left;
+}
+@media (max-width: 600px) {
+    .help-section1 {
+        width: 90%;
+    }
+}
