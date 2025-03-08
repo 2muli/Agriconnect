@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Ordersf = () => {
   // Data for the table
@@ -26,7 +27,8 @@ const Ordersf = () => {
           <h2>Pending Orders</h2>
         </div>
         <div className="d-flex justify-content-end mb-2">
-          <button className="btn btn-success bi bi-plus">Add Order</button>
+          <Link to="/addorder"><button className="btn btn-success bi bi-plus">Add Order</button>
+          </Link>
         </div>
         <div className="table-responsive">
           <table className="table table-striped">
@@ -39,8 +41,8 @@ const Ordersf = () => {
                 <th scope="col">Quantity</th>
                 <th scope='col'>Total Price</th>
                 <th scope="col">Ordered Date</th>
+                <th scope="col">Approval</th>
                 <th scope="col">Action</th>
-                <th scope="col">Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -64,6 +66,8 @@ const Ordersf = () => {
                     </div>
                   </td>
                   <td scope='col'>
+                  <Link to="/editorder"><button className="btn btn-primary btn-sm mb-2 mb-sm-0 me-2 bi bi-pencil">Edit</button>
+                  </Link>
                     <button className="btn btn-danger btn-sm">Delete</button>
                   </td>
                 </tr>
@@ -110,6 +114,7 @@ const Ordersf = () => {
                 <th scope="col">Quantity</th>
                 <th scope='col'>Total Price</th>
                 <th scope="col">Ordered Date</th>
+                <th scope='col'>Status</th>
                 <th scope="col">Action</th>
               </tr>
             </thead>
@@ -123,6 +128,10 @@ const Ordersf = () => {
                   <td>{row.handle}</td>
                   <td>{row.handle}</td>
                   <td>{row.handle}</td>
+                  <td>
+                  <span className="badge bg-success fs-6">Approved</span>
+                  <span className="badge bg-danger fs-6">Rejected</span>                   
+                  </td>
                   <td>
                     <div className="d-flex flex-row flex-sm-row justify-content-start">
                     <button className="btn btn-danger btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">

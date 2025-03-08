@@ -1,5 +1,5 @@
 // Contact.jsx
-import "./Contact.css"; // Import CSS for styling
+import "./contact.css"; // Import CSS for styling
 
 const Contact = () => {
   return (

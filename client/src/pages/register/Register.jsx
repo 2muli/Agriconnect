@@ -1,146 +1,130 @@
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./register.css";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    password: "",
+    profile: null,
+    role: "",
+  });
+  const [errors, setErrors] = useState({ email: "", phone_number: "", field: "", password: "", general: "" });
+
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "file" ? files[0] : value,
+    });
+  };
+
+  const validate = () => {
+    let newErrors = { email: "", phone_number: "", field: "", password: "" };
+
+    if (
+      !formData.first_name ||
+      !formData.last_name ||
+      !formData.password ||
+      !formData.phone_number ||
+      !formData.email ||
+      !formData.role
+    ) {
+      newErrors.field = "All fields with * must be filled.";
+    }
+
+    if (!/^[0-9]{10}$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Phone number must be exactly 10 digits.";
+    }
+
+    if (formData.password.length < 4) {
+      newErrors.password = "Password is too short.";
+    } else if (formData.password.length > 17) {
+      newErrors.password = "Password can't exceed 8 characters.";
+    }
+    setErrors(newErrors);
+    return Object.values(newErrors).every((err) => err === "");
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+        formDataToSend.append(key, formData[key]);
+    });
+
+    try {
+        await axios.post("http://localhost:8800/server/user/register", formDataToSend, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        navigate("/login");
+    } catch (err) {
+        if (err.response?.data?.field) {
+            // If the backend sends a specific field error (email/phone_number)
+            setErrors((prev) => ({ ...prev, [err.response.data.field]: err.response.data.message }));
+        } else {
+            setErrors((prev) => ({ ...prev, general: "Something went wrong. Please try again." }));
+        }
+    }
+};
+
+
   return (
     <section className="h-100 d-flex justify-content-center align-items-center bg-transparent">
       <div className="container py-5 h-100">
         <div className="row d-flex justify-content-center align-items-center h-100">
           <div className="col-xl-8">
-            <div
-              className="card card-registration my-4"
-              style={{ maxWidth: "900px" }}
-            >
+            <div className="card card-registration my-4" style={{ maxWidth: "900px" }}>
               <div className="row g-0">
-                {/* Left Side (Image) */}
                 <div className="col-xl-6 d-none d-xl-block">
-                  <img
-                    src="/Agriconnect.jpg"
-                    alt="Sample photo"
-                    className="img-fluid"
-                    style={{
-                      borderTopLeftRadius: ".25rem",
-                      borderBottomLeftRadius: ".25rem",
-                      height: "100%",
-                    }}
-                  />
+                  <img src="/Agriconnect.jpg" alt="Sample" className="img-fluid" style={{ borderRadius: ".25rem", height: "100%" }} />
                 </div>
-
-                {/* Right Side (Form) */}
                 <div className="col-xl-6">
                   <div className="card-body p-md-5 text-black">
-                    <h3 className="mb-5 text-uppercase">Registration form</h3>
+                    <h3 className="mb-5 text-uppercase">Registration Form</h3>
+                    <form onSubmit={handleSubmit}>
+                      {errors.field && <p className="text-danger">{errors.field}</p>}
+                      {errors.general && <p className="text-danger">{errors.general}</p>}
 
-                    {/* First Name & Last Name */}
-                    <div className="row">
-                      <div className="col-md-6 mb-4">
-                        <div data-mdb-input-init className="form-outline">
-                          <input
-                            type="text"
-                            id="form3Example1m"
-                            className="form-control form-control-lg"
-                          />
-                          <label
-                            className="form-label"
-                            htmlFor="form3Example1m"
-                          >
-                            First name
-                          </label>
+                      <div className="row">
+                        <div className="col-md-6 mb-4">
+                          <input type="text" name="first_name" className="form-control form-control-lg" onChange={handleChange} placeholder="First name" />
+                        </div>
+                        <div className="col-md-6 mb-4">
+                          <input type="text" name="last_name" className="form-control form-control-lg" onChange={handleChange} placeholder="Last name" />
                         </div>
                       </div>
-                      <div className="col-md-6 mb-4">
-                        <div data-mdb-input-init className="form-outline">
-                          <input
-                            type="text"
-                            id="form3Example1n"
-                            className="form-control form-control-lg"
-                          />
-                          <label
-                            className="form-label"
-                            htmlFor="form3Example1n"
-                          >
-                            Last name
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Address */}
-                    <div data-mdb-input-init className="form-outline mb-4">
-                      <input
-                        type="email"
-                        id="form3Example8"
-                        className="form-control form-control-lg"
-                      />
-                      <label className="form-label" htmlFor="form3Example8">
-                        Email
-                      </label>
-                    </div>
-                    <div data-mdb-input-init className="form-outline mb-4">
-                      <select
-                        data-mdb-select-init
-                        className="form-select form-select-lg"
-                      >
-                        <option value="0">--select--</option>
-                        <option value="2">Farmer</option>
-                        <option value="3">Buyer</option>
+
+                      <input type="email" name="email" className="form-control form-control-lg mb-2" onChange={handleChange} placeholder="Email" />
+                      {errors.email && <small className="text-danger">{errors.email}</small>}
+
+                      <select name="role" className="form-select form-select-lg mb-4" onChange={handleChange}>
+                        <option value="">--select--</option>
+                        <option value="Farmer">Farmer</option>
+                        <option value="Buyer">Buyer</option>
                       </select>
-                      <label>Type</label>
-                    </div>
-                    {/* DOB & Pincode */}
-                    <div data-mdb-input-init className="form-outline mb-4">
-                      <input
-                        type="file"
-                        id="form3Example9"
-                        className="form-control form-control-lg"
-                      />
-                      <label className="form-label" htmlFor="form3Example9">
-                        Profile
-                      </label>
-                    </div>
-                    <div data-mdb-input-init className="form-outline mb-4">
-                      <input
-                        type="text"
-                        id="form3Example90"
-                        className="form-control form-control-lg"
-                      />
-                      <label className="form-label" htmlFor="form3Example90">
-                        Phone Number
-                      </label>
-                    </div>
 
-                    {/* Course & Email ID */}
-                    <div data-mdb-input-init className="form-outline mb-4">
-                      <input
-                        type="text"
-                        id="form3Example99"
-                        className="form-control form-control-lg"
-                      />
-                      <label className="form-label" htmlFor="form3Example99">
-                        Password
-                      </label>
-                    </div>
-                    <div className="d-grid gap-2">
-                      <button
-                        data-mdb-button-init
-                        data-mdb-ripple-init
-                        className="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3"
-                        type="button"
-                      >
-                        Sign up
-                      </button>
-                    </div>
-                    {/* Buttons */}
+                      <input type="file" name="profile" className="form-control form-control-lg mb-4" onChange={handleChange} />
+
+                      <input type="text" name="phone_number" className="form-control form-control-lg mb-2" onChange={handleChange} placeholder="Phone Number" />
+                      {errors.phone_number && <small className="text-danger">{errors.phone_number}</small>}
+
+                      <input type="password" name="password" className="form-control form-control-lg mb-4" onChange={handleChange} placeholder="Password" />
+                      {errors.password && <small className="text-danger">{errors.password}</small>}<br/>
+
+                      <button className="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" type="submit">Sign up</button>
+                    </form>
+
                     <div className="d-flex align-items-center justify-content-center mt-4">
                       <p className="mb-0 me-2 text-muted">Have an account?</p>
                       <Link to="/login">
-                        <button
-                          type="button"
-                          data-mdb-button-init
-                          data-mdb-ripple-init
-                          className="btn btn-outline-danger btn-sm"
-                        >
-                          Sign in
-                        </button>
+                        <button className="btn btn-outline-danger btn-sm">Sign in</button>
                       </Link>
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Earning = () => {
   // Data for the table
@@ -22,8 +23,13 @@ const Earning = () => {
   return (
     <>
       <div className="m-4 mx-auto mx-lg-5 p-5" style={{ maxHeight: '90vh' }}>
+      <div className="d-flex justify-content-center text-white mb-2">
+          <h1>Earning List</h1>
+        </div>
         <div className="d-flex justify-content-end mb-2">
+          <Link to="/addearning">
           <button className="btn btn-success bi bi-plus">Add Earning</button>
+          </Link>
         </div>
         <div className="table-responsive">
           <table className="table table-striped">
@@ -47,9 +53,11 @@ const Earning = () => {
                   <td>{row.handle}</td>
                   <td>
                     <div className="d-flex flex-row flex-sm-row justify-content-start">
+                    <Link to="/editearning">
                     <button className="btn btn-primary btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">
                     <i className="bi bi-pencil d-none d-sm-inline"></i> Edit
                       </button>
+                    </Link>
                       <button className="btn btn-danger btn-sm mb-2 mb-sm-0">
                         Delete
                       </button>

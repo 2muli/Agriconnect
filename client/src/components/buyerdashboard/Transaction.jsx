@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Transactions = () => {
   // Data for the table
@@ -26,7 +27,8 @@ const Transactions = () => {
           <h2>Transactions History</h2>
         </div>
         <div className="d-flex justify-content-end mb-2">
-          <button className="btn btn-success bi bi-plus">Add Transaction</button>
+          <Link to="/addtransaction">
+          <button className="btn btn-success bi bi-plus">Add Transaction</button></Link>
         </div>
         <div className="table-responsive">
           <table className="table table-striped">
@@ -37,6 +39,7 @@ const Transactions = () => {
                 <th scope="col">Crop Name</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Price (Ksh)</th>
+                <th scope="col">Total Cost (Ksh)</th>
                 <th scope="col">Transaction Date</th>
                 <th scope="col">Action</th>
               </tr>
@@ -48,13 +51,14 @@ const Transactions = () => {
                   <td>{row.first}</td>
                   <td>{row.last}</td>
                   <td>{row.last}</td>
+                  <td>{row.last}</td>
                   <td>{row.handle}</td>
                   <td>{row.handle}</td>
                   <td>
                     <div className="d-flex flex-row flex-sm-row justify-content-start">
-                    <button className="btn btn-primary btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">
+                    <Link to="/edittransaction"> <button className="btn btn-primary btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">
                     <i className="bi bi-pencil d-none d-sm-inline"></i> Edit
-                      </button>
+                      </button></Link>
                       <button className="btn btn-danger btn-sm mb-2 mb-sm-0">
                         Delete
                       </button>

@@ -1,11 +1,23 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = ({ toggleSidebar }) => {
   const [isLogged, setIsLogged] = useState(true);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = async(e) => {
+    e.preventDefault();
+    try {
+      await logout();
+      navigate("/login"); // ✅ Ensures proper redirection
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
   return (
     <nav
-      className="navbar navbar-expand-lg sticky-bottom"
+      className="navbar navbar-expand-lg fixed-top"
       style={{ backgroundColor: "green" }}
     >
       <div className="container-fluid">
@@ -136,8 +148,8 @@ const Navbar = ({ toggleSidebar }) => {
           {isLogged && (
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link to="#" className="nav-link text-white g-3">
-                  <button className="btn btn-outline-light" type="button">
+                <Link className="nav-link text-white g-3">
+                  <button type="button" onClick={handleLogout} className="btn btn-outline-light">
                     Logout
                   </button>
                 </Link>

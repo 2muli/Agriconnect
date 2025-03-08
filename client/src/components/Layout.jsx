@@ -4,7 +4,7 @@ import Sidebar from "./sidebar/Sidebar";
 
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLogged]=useState(true)
+  const [isLogged, setIsLogged] = useState(true); // Added setIsLogged for potential future use
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -13,7 +13,7 @@ const Layout = () => {
   return (
     <div>
       <Navbar toggleSidebar={toggleSidebar} />
-      {isLogged &&<Sidebar isSidebarOpen={isSidebarOpen} />}
+      {isLogged && <Sidebar isSidebarOpen={isSidebarOpen} />}
     </div>
   );
 };
