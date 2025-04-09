@@ -1,247 +1,325 @@
-import { Link } from "react-router-dom";
-
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { format } from "date-fns";
+import Cookies from "js-cookie";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+const fetchNotificationsNumber = async (id) => {
+  try {
+    const response = await axios.get(`http://localhost:8800/server/notification/getNumberOfNotification/${id}`, {
+      withCredentials: true,
+    });
+    return response.data || [];
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("Unauthorized: Please log in again.");
+    }
+    console.error("Error fetching notifications:", error);
+    throw new Error("Failed to fetch notifications");
+  }
+};
+const fetchOrders = async () => {
+  try {
+    const response = await axios.get("http://localhost:8800/server/order/getAllOrders", {
+      withCredentials: true,
+    });
+    return response.data || [];
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("Unauthorized: Please log in again.");
+    }
+    console.error("❌ Error fetching orders:", error);
+    throw new Error("Failed to fetch orders");
+  }
+};
+const fetchNotifications = async () => {
+  try {
+    const response = await axios.get("http://localhost:8800/server/notification/getMyNotifications/", {
+      withCredentials: true,
+    });
+    console.log("Fetched Notifications:", response.data);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    throw new Error("Failed to fetch notifications");
+  }
+};
+const fetchCrops = async () => {
+  const response = await axios.get(`http://localhost:8800/server/crop/getCropsNumber`, {
+    withCredentials: true,
+  });
+  return response.data;
+};
+const fetchOrdersN = async (id) => {
+  const response = await axios.get(`http://localhost:8800/server/order/getMyOrdersNumber/${id}`, {
+    withCredentials: true,
+  });
+  return response.data;
+};
 const BuyerDashboard = () => {
+  const { isAuthenticated,userDetails} = useAuth();
+  const navigate = useNavigate();
+    useEffect(() => {
+      if (!isAuthenticated || !Cookies.get("user")) {
+        navigate("/login");
+      }
+    }, [isAuthenticated, navigate]);
+  const { data: data, isError, isLoading, error } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: fetchNotificationsNumber,
+    staleTime: 300,
+    retry: false,
+  });
+  const { data: crops, isErrors, isLoadings } = useQuery({
+    queryKey: ["crops"],
+    queryFn: fetchCrops,
+    staleTime: 300,
+    retry: false,
+  });
+  const { data: notifications, isErrorn, isLoadingn, errorn } = useQuery({
+      queryKey: ["notificationsa"],
+      queryFn: fetchNotifications,
+      staleTime: 300,
+      retry: false,
+    });
+  const { data: orders, isError0, isLoading0 } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrdersN,
+    staleTime: 300,
+    retry: false,
+  });
+  const {
+      data: allData,
+      isError: isAllError,
+      error: allError,
+      isLoading: isAllLoading
+    } = useQuery({
+      queryKey: ["allOrders"],
+      queryFn: fetchOrders,
+    });
+  if (isLoading || isLoadings) return <span>Loading...</span>;
+  if (isError || isErrors) {
+    return error.message.includes("Unauthorized") ? (
+      <div className="text-center text-danger">
+        <p>Session expired. Please <Link to="/login">log in</Link> again.</p>
+      </div>
+    ) : (
+      <span className="text-danger">Network error! Retry later.</span>
+    );
+  }
 
   return (
-    <div className="mt-3">
-      <main id="main" className="main">
-        <div className="pagetitle">
-          <h1 className="text-white">Buyer Dashboard</h1>
-          <nav>
-            <ol className="breadcrumb">
-              <li className="breadcrumb-item text-white"><Link href="/bdashboard">Home</Link></li>
-              <li className="breadcrumb-item text-white active">Dashboard</li>
-            </ol>
-          </nav>
-        </div>
+    <div className="container mt-4">
+      {/* Header Section */}
+      <div className="mb-4">
+        <h1 className="text-primary">Farmer Dashboard</h1>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link to="/fdashboard">Home</Link>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              Dashboard
+            </li>
+          </ol>
+        </nav>
+      </div>
 
-        <section className="section dashboard">
-          <div className="row">
-            <div className="col-lg-8">
-              <div className="row">
-                {/* Sales Card */}
-                <div className="col-xxl-4 col-md-6">
-              <div className="card info-card sales-card">
-
-                <div className="filter">
-                  <a className="icon" href="#" data-bs-toggle="dropdown"><i className="bi bi-three-dots"></i></a>
-                  <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li className="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a className="dropdown-item" href="#">Today</a></li>
-                    <li><a className="dropdown-item" href="#">This Month</a></li>
-                    <li><a className="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div className="card-body">
-                  <h5 className="card-title">Sales <span>| Today</span></h5>
-
-                  <div className="d-flex align-items-center">
-                    <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i className="bi bi-cart"></i>
-                    </div>
-                    <div className="ps-3">
-                      <h6>145</h6>
-                      <span className="text-success small pt-1 fw-bold">12%</span> <span className="text-muted small pt-2 ps-1">increase</span>
-
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-                {/* Revenue Card */}
-                <div className="col-xxl-4 col-md-6">
-                  <div className="card info-card revenue-card">
-                    <div className="filter">
-                      <a className="icon" href="#" data-bs-toggle="dropdown">
-                        <i className="bi bi-three-dots"></i>
-                      </a>
-                      <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li className="dropdown-header text-start">
-                          <h6>Filter</h6>
-                        </li>
-                        <li><a className="dropdown-item" href="#">Today</a></li>
-                        <li><a className="dropdown-item" href="#">This Month</a></li>
-                        <li><a className="dropdown-item" href="#">This Year</a></li>
-                      </ul>
-                    </div>
-                    <div className="card-body">
-                      <h5 className="card-title">Revenue <span>| This Month</span></h5>
-                      <div className="d-flex align-items-center">
-                        <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                          <i className="bi bi-currency-dollar"></i>
-                        </div>
-                        <div className="ps-3">
-                          <h6>$3,264</h6>
-                          <span className="text-success small pt-1 fw-bold">8%</span> <span className="text-muted small pt-2 ps-1">increase</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Customers Card */}
-                <div className="col-xxl-4 col-xl-12">
-                  <div className="card info-card customers-card">
-                    <div className="filter">
-                      <a className="icon" href="#" data-bs-toggle="dropdown">
-                        <i className="bi bi-three-dots"></i>
-                      </a>
-                      <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li className="dropdown-header text-start">
-                          <h6>Filter</h6>
-                        </li>
-                        <li><a className="dropdown-item" href="#">Today</a></li>
-                        <li><a className="dropdown-item" href="#">This Month</a></li>
-                        <li><a className="dropdown-item" href="#">This Year</a></li>
-                      </ul>
-                    </div>
-                    <div className="card-body">
-                      <h5 className="card-title">Customers <span>| This Year</span></h5>
-                      <div className="d-flex align-items-center">
-                        <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                          <i className="bi bi-people"></i>
-                        </div>
-                        <div className="ps-3">
-                          <h6>1244</h6>
-                          <span className="text-danger small pt-1 fw-bold">12%</span> <span className="text-muted small pt-2 ps-1">decrease</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-             {/* Recent Sales Table */}
-                <div className="col-12">
-                  <div className="card recent-sales overflow-auto">
-                    <div className="filter">
-                      <a className="icon" href="#" data-bs-toggle="dropdown">
-                        <i className="bi bi-three-dots"></i>
-                      </a>
-                      <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li className="dropdown-header text-start">
-                          <h6>Filter</h6>
-                        </li>
-                        <li><a className="dropdown-item" href="#">Today</a></li>
-                        <li><a className="dropdown-item" href="#">This Month</a></li>
-                        <li><a className="dropdown-item" href="#">This Year</a></li>
-                      </ul>
-                    </div>
-                    <div className="card-body">
-                      <h5 className="card-title">Recent Sales <span>| Today</span></h5>
-                      <table className="table table-borderless datatable">
-                        <thead>
-                          <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Customer</th>
-                            <th scope="col">Product</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <th scope="row"><a href="#">#2457</a></th>
-                            <td>Brandon Jacob</td>
-                            <td><a href="#" className="text-primary">At praesentium minu</a></td>
-                            <td>$64</td>
-                            <td><span className="badge bg-success">Approved</span></td>
-                          </tr>
-                          <tr>
-                            <th scope="row"><a href="#">#2147</a></th>
-                            <td>Bridie Kessler</td>
-                            <td><a href="#" className="text-primary">Blanditiis dolor omnis similique</a></td>
-                            <td>$47</td>
-                            <td><span className="badge bg-warning">Pending</span></td>
-                          </tr>
-                          <tr>
-                            <th scope="row"><a href="#">#2049</a></th>
-                            <td>Ashleigh Langosh</td>
-                            <td><a href="#" className="text-primary">At recusandae consectetur</a></td>
-                            <td>$147</td>
-                            <td><span className="badge bg-success">Approved</span></td>
-                          </tr>
-                          <tr>
-                            <th scope="row"><a href="#">#2644</a></th>
-                            <td>Angus Grady</td>
-                            <td><a href="#" className="text-primary">Ut voluptatem id earum et</a></td>
-                            <td>$67</td>
-                            <td><span className="badge bg-danger">Rejected</span></td>
-                          </tr>
-                          <tr>
-                            <th scope="row"><a href="#">#2644</a></th>
-                            <td>Raheem Lehner</td>
-                            <td><a href="#" className="text-primary">Sunt similique distinctio</a></td>
-                            <td>$165</td>
-                            <td><span className="badge bg-success">Approved</span></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="col-12">
-                  <div className="card">
-                    <div className="card-body">
-                      <h5 className="card-title">Recent Activity <span>| Today</span></h5>
-                      <div className="activity">
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">32 min</div>
-                          <i className="bi bi-circle-fill activity-badge text-success align-self-start"></i>
-                          <div className="activity-content">
-                            Quia quae rerum <a href="#" className="fw-bold text-dark">explicabo officiis</a> beatae
-                          </div>
-                        </div>
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">56 min</div>
-                          <i className="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
-                          <div className="activity-content">
-                            Voluptatem blanditiis blanditiis eveniet
-                          </div>
-                        </div>
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">2 hrs</div>
-                          <i className="bi bi-circle-fill activity-badge text-primary align-self-start"></i>
-                          <div className="activity-content">
-                            Voluptates corrupti molestias voluptatem
-                          </div>
-                        </div>
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">1 day</div>
-                          <i className="bi bi-circle-fill activity-badge text-info align-self-start"></i>
-                          <div className="activity-content">
-                            Tempore autem saepe <a href="#" className="fw-bold text-dark">occaecati voluptatem</a> tempore
-                          </div>
-                        </div>
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">2 days</div>
-                          <i className="bi bi-circle-fill activity-badge text-warning align-self-start"></i>
-                          <div className="activity-content">
-                            Est sit eum reiciendis exercitationem
-                          </div>
-                        </div>
-                        <div className="activity-item d-flex">
-                          <div className="activite-label">4 weeks</div>
-                          <i className="bi bi-circle-fill activity-badge text-muted align-self-start"></i>
-                          <div className="activity-content">
-                            Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Cards Section */}
+      <div className="row">
+        <div className="col-md-4">
+          <div className="card">
+            <div className="card-body">
+            <Link to="/notification" className="d-flex justify-content-end mb-0 me-4">
+              More
+            </Link>
+              <h5 className="card-title">Notifications</h5>
+              <h6>{data?.numberOfMyNotification||0}</h6>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+        <div className="col-md-4">
+          <div className="card">
+            <div className="card-body">
+            <Link to="/produceb" className="d-flex justify-content-end mb-0 me-4">
+              More
+            </Link>
+              <h5 className="card-title">Crops</h5>
+              <h6>{crops && crops.length > 0 ? crops[0].cropNumber : "No crops available"}</h6>
+
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card">
+            <div className="card-body">
+            <Link to="/ordersf" className="d-flex justify-content-end mb-0 me-4">
+              More
+            </Link>
+              <h5 className="card-title">Orders</h5>
+              <h6>{Array.isArray(orders) ? orders[0]?.ordersNumber || 0 : orders?.ordersNumber || 0}</h6>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Sales Table */}
+      <div className="col-12 mt-4">
+  <div className="card recent-sales overflow-auto">
+    <div className="filter">
+      <Link to="/notification" className="icon d-flex justify-content-end mb-0 me-4">
+        <span>More</span>
+      </Link>
+      <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+        <li className="dropdown-header text-start">
+          <h6>Filter</h6>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#">
+            Today
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#">
+            This Month
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#">
+            This Year
+          </a>
+        </li>
+      </ul>
+    </div>
+          <div className="card-body">
+            <h5 className="card-title">
+              Recent Orders <span>| Today</span>
+            </h5>
+            <table className="table table-borderless datatable">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Farmer Name</th>
+                  <th scope="col">Farmer Phone</th>
+                  <th scope="col">Crop Bought</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Ordered Date</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allData?.length< 5?
+                allData.map((order, index) =>(
+                <tr key={order?.id}>
+                  
+                  <th scope="row">
+                    <i href="#">{index+1}</i>
+                  </th>
+                  <td>{order?.seller_first_name}</td>
+                  <td>{order?.seller_phone}</td>
+                  <td>{order?.crop_name}</td>
+                  <td>{order?.quantity}</td>
+                  <td>{order.created_at ? format(new Date(order.created_at), "MMM dd, yyyy") : "N/A"}</td>
+                  <td>
+                      {(() => {
+                        switch (order.status) {
+                          case "Approved":
+                            return <span className="badge bg-success">Approved</span>;
+                          case "Rejected":
+                            return <span className="badge bg-danger">Rejected</span>;
+                          default:
+                            return <span className="badge bg-warning">Pending</span>;
+                        }
+                      })()}
+                    </td>
+                </tr>
+                     )):null }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+       {/* Recent Sales Table */}
+       <div className="col-12 mt-4">
+        <div className="card recent-sales overflow-auto">
+          <div className="filter">
+          <Link to="/notification" className="d-flex justify-content-end mb-0 me-4">
+              More
+            </Link>
+            <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+              <li className="dropdown-header text-start">
+                <h6>Filter</h6>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#">
+                  Today
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#">
+                  This Month
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#">
+                  This Year
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div className="card-body">
+            <h5 className="card-title">
+              Recent Notifications <span>| Today</span>
+            </h5>
+            <table className="table table-borderless datatable">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">From/To</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">Notification</th>
+                  <th scope="col">Send Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notifications?.length< 5?
+                notifications.map((notification, index) =>(
+                <tr key={notification?.id}>
+                  
+                  <th scope="row">
+                    <i href="#">{index+1}</i>
+                  </th>
+                  <td>
+                    <span className={userDetails?.id === notification.sender_id ? "text-success" : "text-primary"}>
+                      {userDetails?.id === notification.sender_id ? (
+                        <>
+                          <i className="bi bi-arrow-up-right-circle"></i> To:
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-arrow-down-left-circle"></i> From:
+                        </>
+                      )}
+                    </span>
+                    <br />
+
+                    {userDetails?.id !== notification.sender_id
+                      ? `${notification.sender_first_name || "Unknown"} ${notification.sender_last_name || "Unknown"}`
+                      : `${notification.receiver_first_name || "Unknown"} ${notification.receiver_last_name || "Unknown"}`}
+                  </td>
+                  <td>
+                    {userDetails?.id !== notification.sender_id ? notification.sender_phone || "Unknown" : notification.receiver_phone || "Unknown"}
+                  </td>
+                  <td>{notification?.notification}</td>
+                  <td>{notification.created_at ? format(new Date(notification.created_at), "MMM dd, yyyy") : "N/A"}</td>
+                </tr>
+                     )):null }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>      
     </div>
   );
 };

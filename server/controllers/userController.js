@@ -31,6 +31,9 @@ const uploadPromise = (req, res) =>
     upload(req, res, (err) => (err ? reject(err) : resolve()));
   });
 
+/** ============================
+ *  🚀 Register New User
+ ============================= */
 export const register = async (req, res) => {
   try {
     await uploadPromise(req, res);
@@ -78,6 +81,9 @@ export const register = async (req, res) => {
   }
 };
 
+/** ============================
+ *  🔑 User Login
+ ============================= */
 export const login = async (req, res) => {
   try {
     const { phone_number, email, password } = req.body;
@@ -111,7 +117,6 @@ export const login = async (req, res) => {
       secure: false, // ❌ Change from true → false for local development
       sameSite: "Lax", // ✅ Change from "None" → "Lax" for local development
     });
-    
 
     const { password: _, ...otherDetails } = user;
     return res.status(200).json({ message: "Login successful!", details: otherDetails });
@@ -122,6 +127,9 @@ export const login = async (req, res) => {
   }
 };
 
+/** ============================
+ *  🔍 Fetch Logged-In User Details
+ ============================= */
 export const LoggedUserDetails = async (req, res) => {
   try {
       const token = req.cookies.access_token;
@@ -149,6 +157,9 @@ export const LoggedUserDetails = async (req, res) => {
   }
 };
 
+/** ============================
+ *  🚪 Logout User
+ ============================= */
 export const logout = (req, res) => {
   try {
     if (!req.cookies.access_token) {
@@ -169,6 +180,10 @@ export const logout = (req, res) => {
     return res.status(500).json({ message: "An error occurred while logging out." });
   }
 };
+
+/** ============================
+ *  🛡️ Verify Token Middleware
+ ============================= */
 export const verifyToken = (req, res, next) => {
   const token = req.cookies?.access_token; // ✅ Use optional chaining to prevent errors
 
@@ -191,5 +206,137 @@ export const verifyToken = (req, res, next) => {
       });
   } catch (error) {
       return res.status(403).json({ message: "Invalid or Expired Token" });
+  }
+};
+export const getFarmers = async (req, res) => {
+  if(!req.user){
+    return res.status(401).json({ message: "Unauthorized: No user information found" });
+  }
+  try {
+    let q;
+
+    if (req.user.role === "Farmer") {
+      q = "SELECT * FROM users WHERE role='Buyer' ORDER BY first_name";  // Assuming ordering by name
+    } else {
+      q = "SELECT * FROM users WHERE role='Farmer' ORDER BY first_name"; // Corrected ORDER BY
+    }
+
+    db.query(q, (err, result) => {
+      if (err) {
+        console.error("Error fetching users:", err);
+        return res.status(500).json({ message: "Error occurred during user fetching!" });
+      }
+      return res.status(200).json(result);
+    });
+
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+export const updateProfile = (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: You cannot change someone else's account!" });
+  }
+
+  try {
+    const userId = req.user.id;
+    const { first_name, last_name } = req.body;
+    const profile = req.file ? req.file.filename : null;
+
+    // Fetch current user details
+    const selectQuery = "SELECT first_name, last_name, profile FROM users WHERE id=?";
+    
+    db.query(selectQuery, [userId], (selectErr, result) => {
+      if (selectErr) {
+        console.error("Database error while fetching user:", selectErr);
+        return res.status(500).json({ message: "An error occurred while retrieving user data." });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({ message: "User not found!" });
+      }
+
+      const currentUser = result[0];
+
+      // Only update fields that have changed
+      const updatedFirstName = first_name && first_name !== currentUser.first_name ? first_name : currentUser.first_name;
+      const updatedLastName = last_name && last_name !== currentUser.last_name ? last_name : currentUser.last_name;
+      const updatedProfile = profile ? profile : currentUser.profile;
+
+      if (updatedFirstName === currentUser.first_name &&
+          updatedLastName === currentUser.last_name &&
+          updatedProfile === currentUser.profile) {
+        return res.status(200).json({ message: "Profile remains the same.", updatedUser: currentUser });
+      }
+
+      // Update only the changed fields
+      const updateQuery = "UPDATE `users` SET `first_name`=?, `last_name`=?, `profile`=? WHERE `id`=?";
+      const values = [updatedFirstName, updatedLastName, updatedProfile, userId];
+
+      db.query(updateQuery, values, (updateErr, data) => {
+        if (updateErr) {
+          console.error("Database error:", updateErr);
+          return res.status(500).json({ message: "An error occurred while updating user data." });
+        }
+
+        // Fetch the updated user details
+        db.query(selectQuery, [userId], (newSelectErr, updatedResult) => {
+          if (newSelectErr) {
+            return res.status(500).json({ message: "Error retrieving updated user details." });
+          }
+
+          res.status(200).json({ message: "Profile updated successfully!", updatedUser: updatedResult[0] });
+        });
+      });
+    });
+  } catch (error) {
+    console.error("Error occurred while updating profile:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+export const changePassword = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: You cannot change someone else's password!" });
+  }
+
+  const id = req.user.id;
+  const { oldPassword, newPassword } = req.body;
+
+  if (!id || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: "All fields are required!" });
+  }
+
+  try {
+    // Fetch the current password from the database
+    const q = "SELECT password FROM users WHERE id = ?";
+    db.query(q, [id], async (err, result) => {
+      if (err) return res.status(500).json({ message: "Database error!" });
+      if (result.length === 0) return res.status(404).json({ message: "User not found!" });
+
+      const hashedPassword = result[0].password;
+
+      // Check if old password matches
+      const isMatch = await bcrypt.compare(oldPassword, hashedPassword);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Wrong old password!" });
+      }
+
+      // Hash new password
+      const salt = await bcrypt.genSalt(10);
+      const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+      // Update password in database
+      const updateQ = "UPDATE users SET password = ? WHERE id = ?";
+      db.query(updateQ, [newHashedPassword, id], (updateErr) => {
+        if (updateErr) return res.status(500).json({ message: "Error updating password!" });
+
+        return res.status(200).json({ success: true, message: "Password updated successfully!" });
+      });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error!" });
   }
 };

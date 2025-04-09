@@ -7,8 +7,13 @@ import "./sidebar.css";
 
 const Sidebar = ({ isSidebarOpen }) => {
   const navigate = useNavigate();
-  const { logout, userDetails, isAuthenticated } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const [isFarmer, setIsFarmer] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSubmenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -32,105 +37,94 @@ const Sidebar = ({ isSidebarOpen }) => {
     }
   };
 
+  if (!isAuthenticated) {
+    return null; // Hide sidebar if not authenticated
+  }
+
   return (
     <div className="navbar navbar-expand-lg fixed-top">
       <div className="wrapper">
         <div id="sidebar" className={isSidebarOpen ? "active" : ""}>
-          {isFarmer ? (
-            <div>
-              <ul className="components">
-                <li className='nav-item'>
-                  <Link to="/fdashboard" className='nav-link'>
-                    <i className="bi bi-house-door"></i>
-                    <span>Dashboard</span>
+          <ul className="components">
+            <li className='nav-item'>
+              <Link to={isFarmer ? "/fdashboard" : "/bdashboard"} className='nav-link'>
+                <i className="bi bi-house-door"></i>
+                <span>Dashboard</span>
+              </Link>
+            </li>
+
+            <li className='nav-item'>
+              <Link to={isFarmer ? "/produce" : "/produceb"} className='nav-link'>
+                <i className="bi bi-crop"></i>
+                <span>{isFarmer ? "Produce" : "Available Produce"}</span>
+              </Link>
+            </li>
+
+            <li className='nav-item'>
+              <Link to={isFarmer ? "/orders" : "/ordersf"} className='nav-link'>
+                <i className="bi bi-cart"></i>
+                <span>{isFarmer ? "Orders" : "Order History"}</span>
+              </Link>
+            </li>
+
+            <li className='nav-item'>
+              <Link to={isFarmer ? "/earning" : "/transaction"} className='nav-link'>
+                <i className="bi bi-cash"></i>
+                <span>{isFarmer ? "Earnings" : "Transactions"}</span>
+              </Link>
+            </li>
+
+            <li className='nav-item'>
+              <Link to="/notification" className='nav-link'>
+                <i className='bi bi-bell'></i>
+                <span>Notifications</span>
+              </Link>
+            </li>
+
+            {/* My Account with Dropdown & Chevron */}
+            <li className='nav-item'>
+              <span 
+                onClick={toggleSubmenu} 
+                className="nav-link d-flex justify-content-between align-items-center" 
+                style={{ cursor: "pointer" }}
+              >
+                <span>
+                  <i className='bi bi-person'></i> <span>My Account</span>
+                </span>
+                <i className={`bi ${isOpen ? "bi-chevron-up" : "bi-chevron-down"}`} />
+              </span>
+              
+              {/* Submenu with Spacing */}
+              <ul className={`nav flex-column ms-3 mt-2 ${isOpen ? "show" : "collapse"}`} id="submenu2">
+                <li className="w-100">
+                  <Link to="/profile" className="nav-link px-2" style={{ marginLeft: "10px" }}>
+                    <i className="bi bi-person"></i>
+                    <span className="d-sm-inline ms-2">Profile</span>
                   </Link>
                 </li>
-                <li className='nav-item'>
-                  <Link to="/produce" className='nav-link'>
-                    <i className="bi bi-crop"></i>
-                    <span>Produce</span>
+                <li className="w-100">
+                  <Link to="/editProfile" className="nav-link px-2" style={{ marginLeft: "10px" }}>
+                    <i className="bi bi-person-gear"></i>
+                    <span className="d-none d-sm-inline ms-2">Change Account</span>
+                    <span className="d-inline d-sm-none ms-2">Update</span>
                   </Link>
                 </li>
-                <li className='nav-item'>
-                  <Link to="/orders" className='nav-link'>
-                    <i className="bi bi-cart"></i>
-                    <span>Orders</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/earning" className='nav-link'>
-                    <i className="bi bi-cash"></i>
-                    <span>Earnings</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/notification" className='nav-link'>
-                    <i className='bi bi-bell'></i>
-                    <span>Notifications</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/farmerprofile" className='nav-link'>
-                    <i className="bi bi-person-fill"></i>
-                    <span>Profile</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link onClick={handleLogout} className='nav-link'>
-                    <i className='bi bi-box-arrow-right'></i>
-                    <span>Logout</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          ) : (
-            <div>
-              <ul className="components">
-                <li className='nav-item'>
-                  <Link to="/bdashboard" className='nav-link'>
-                    <i className="bi bi-house-door"></i>
-                    <span>Dashboard</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/produceb" className='nav-link'>
-                    <i className="bi bi-crop"></i>
-                    <span>Available Produce</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/ordersf" className='nav-link'>
-                    <i className="bi bi-cart"></i>
-                    <span>Order History</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/transaction" className='nav-link'>
-                    <i className="bi bi-cash"></i>
-                    <span>Transactions</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/notification" className='nav-link'>
-                    <i className='bi bi-bell'></i>
-                    <span>Notifications</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link to="/buyerprofile" className='nav-link'>
-                    <i className="bi bi-person-fill"></i>
-                    <span>Profile</span>
-                  </Link>
-                </li>
-                <li className='nav-item'>
-                  <Link onClick={handleLogout} className='nav-link'>
-                    <i className='bi bi-box-arrow-right'></i>
-                    <span>Logout</span>
+                <li className='w-100'>
+                  <Link to="/changePassword" className="nav-link px-2" style={{ marginLeft: "10px" }}>
+                    <i className="bi bi-key"></i>
+                    <span className="d-sm-inline ms-2">Password</span>
                   </Link>
                 </li>
               </ul>
-            </div>
-          )}
+            </li>
+
+            <li className='nav-item logout'>
+            <Link onClick={handleLogout} className='nav-link'>
+              <i className='bi bi-box-arrow-right'></i>
+              <span>Logout</span>
+            </Link>
+          </li>
+          </ul>
         </div>
       </div>
     </div>

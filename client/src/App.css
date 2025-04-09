@@ -4,7 +4,7 @@ body {
   background-image: url('backgroundimgn.jpg'); /* Ensure this is a tileable image */
   background-size: 200% auto; /* Scale the image vertically to fit the viewport */
   background-repeat: repeat-x; /* Repeat the image horizontally */
-  animation: slide 200s linear infinite; /* Continuous sliding animation */
+  /* animation: slide 200s linear infinite;  */
 }
 
 @keyframes slide {

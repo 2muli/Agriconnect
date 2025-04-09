@@ -1,4 +1,5 @@
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
 /* Wrapper */
 .wrapper {
     display: flex;
@@ -9,7 +10,7 @@
 /* Sidebar */
 #sidebar {
     position: absolute;
-    top: 70px;
+    top: 50px;
     left: 0;
     height: 100vh; /* Full height */
     width: 250px;
@@ -17,6 +18,9 @@
     color: #fff;
     transition: 0.3s ease-in-out;
     transform: translateX(-100%); /* Initially hidden */
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex;
+    flex-direction: column; /* Arrange items in a column */
 }
 
 #sidebar.active {
@@ -32,6 +36,7 @@
     padding: 20px 0;
     list-style: none;
     margin: 0;
+    flex-grow: 1; /* Allow components to take up available space */
 }
 
 #sidebar ul li {
@@ -52,6 +57,11 @@
     color: #7386D5;
 }
 
+/* Sticky Logout Link */
+#sidebar ul li.logout {
+    margin-top: auto; /* Pushes the logout link to the bottom */
+}
+
 /* Content */
 #content {
     width: 100%;
@@ -59,14 +69,70 @@
     min-height: 100vh;
     transition: 0.3s;
 }
+
 .nav-item i {
     margin-right: 10px; /* Adjust the space as needed */
-  }
-  
+}
+
 /* Responsive Sidebar */
 @media (max-width: 768px) {
     #sidebar {
         width: 200px; /* Adjust width for smaller screens */
         top: 55px;
+        height: calc(100vh - 55px); /* Adjust height dynamically */
+    }
+
+    /* Enable smooth scrolling */
+    #sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb {
+        background: #fff;
+        border-radius: 10px;
+    }
+
+    #sidebar ul.components {
+        padding: 10px 0; /* Reduce padding for smaller screens */
+    }
+
+    #sidebar ul li {
+        padding: 8px; /* Reduce padding for better spacing */
+    }
+
+    #sidebar ul li a {
+        font-size: 1rem; /* Slightly smaller font */
+        padding: 8px;
+    }
+}
+
+/* Fully Responsive for Mobile (Phones) */
+@media (max-width: 480px) {
+    #sidebar {
+        width: 50%; /* Increase sidebar width for smaller screens */
+        transform: translateX(-100%);
+    }
+
+    #sidebar.active {
+        transform: translateX(0);
+    }
+
+    #sidebar ul li a {
+        font-size: 0.95rem; /* Adjust font size for readability */
+        padding: 3px;
+    }
+
+    /* Ensure scrolling works properly on small devices */
+    #sidebar {
+        overflow-y: auto; /* Enable vertical scrolling */
+    }
+
+    #sidebar::-webkit-scrollbar {
+        width: 5px; /* Scrollbar width */
+    }
+
+    #sidebar::-webkit-scrollbar-thumb {
+        background: #fff; /* Scrollbar thumb color */
+        border-radius: 10px; /* Rounded scrollbar */
     }
 }

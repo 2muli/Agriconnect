@@ -22,9 +22,9 @@ export const addProduce = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
-
 export const getCrops = async (req, res) => {
-    const q = "SELECT * FROM crops ORDER BY crop_name";
+    const q = `SELECT crops.*,users.first_name,users.last_name,users.phone_number FROM 
+    crops JOIN users ON users.id = crops.user_id ORDER BY crop_name`;
     try {
         db.query(q, (err, result) => {
             if (err) return res.status(500).json("Error occurred during crop fetching!");
@@ -35,24 +35,55 @@ export const getCrops = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+export const getMyCrops = (req, res) => {
+
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized: No user information found." });
+    }
+
+    const user_id = req.user.id;
+
+    const q = "SELECT * FROM crops WHERE user_id=? ORDER BY crop_name";
+
+    db.query(q, [user_id], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Error fetching crops.", error: err.message });
+        }
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "No crops found for this user." });
+        }
+
+        return res.status(200).json(result);
+    });
+};
+
 export const getCropsByUser = async (req, res) => {
     const { user_id } = req.params;
+
+    // Fetch crops that the buyer can view
     const q = "SELECT * FROM crops WHERE user_id = ?";
+
+    db.query(q, [user_id], (err, result) => {
+        if (err) {
+            console.error("❌ Error fetching crops:", err);
+            return res.status(500).json({ message: "Internal server error while fetching crops!" });
+        }
+        
+        if (result.length === 0) {
+            return res.status(404).json({ message: "No crops found for this user." });
+        }
+
+        return res.status(200).json(result);
+    });
+};
+
+export const getCropByid = async (req, res) => {
+    const { id } = req.params;
+    const q = "SELECT * FROM crops WHERE id = ?";
     try {
-        db.query(q, [user_id], (err, result) => {
-            if (err) return res.status(500).json("Error occurred during crop fetching!");
-            return res.status(200).json(result);
-        });
-    } catch (error) {
-        console.log("Error occurred during crop fetching: ", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-}
-export const getCropByName = async (req, res) => {
-    const { crop_name } = req.params;
-    const q = "SELECT * FROM crops WHERE crop_name = ?";
-    try {
-        db.query(q, [crop_name], (err, result) => {
+        db.query(q, [id], (err, result) => {
             if (err) return res.status(500).json("Error occurred during crop fetching!");
             return res.status(200).json(result);
         });
@@ -117,3 +148,37 @@ export const deleteCrop = async (req, res) => {
         });
     });
 };
+export const getMyCropNumber = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized: No user information found" });
+    }
+    const { id } = req.user;
+    const q = "SELECT COUNT(*) as cropNumber FROM crops WHERE user_id = ?";
+    try {
+        db.query(q, [id], (err, result) => {
+            if (err) return res.status(500).json("Error occurred during crop fetching!");
+            return res.status(200).json(result);
+        
+        });
+    } catch (error) {
+        console.log("Error occurred during crop fetching: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const getAllCropNumber = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized: No user information found" });
+    }
+    const { id } = req.user;
+    const q = "SELECT COUNT(*) as cropNumber FROM crops";
+    try {
+        db.query(q, [id], (err, result) => {
+            if (err) return res.status(500).json("Error occurred during crop fetching!");
+            return res.status(200).json(result);
+        
+        });
+    } catch (error) {
+        console.log("Error occurred during crop fetching: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}

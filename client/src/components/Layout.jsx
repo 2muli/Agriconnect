@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import Navbar from "./navbar/Navbar";
 import Sidebar from "./sidebar/Sidebar";
 
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLogged, setIsLogged] = useState(true); // Added setIsLogged for potential future use
+  const { isAuthenticated } = useAuth(); // ✅ Corrected the typo
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -13,7 +14,7 @@ const Layout = () => {
   return (
     <div>
       <Navbar toggleSidebar={toggleSidebar} />
-      {isLogged && <Sidebar isSidebarOpen={isSidebarOpen} />}
+      {isAuthenticated && <Sidebar isSidebarOpen={isSidebarOpen} />} {/* ✅ Now it works! */}
     </div>
   );
 };

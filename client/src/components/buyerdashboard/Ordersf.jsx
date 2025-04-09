@@ -1,35 +1,120 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { format } from 'date-fns';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const fetchOrders = async () => {
+  try {
+    const response = await axios.get("http://localhost:8800/server/order/", {
+      withCredentials: true,
+    });
+    return response.data || [];
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("Unauthorized: Please log in again.");
+    }
+    console.error("❌ Error fetching orders:", error);
+    throw new Error("Failed to fetch orders");
+  }
+};
+
+const fetchPendingOrders = async () => {
+  try {
+    const response = await axios.get("http://localhost:8800/server/order/getPendingOrder", {
+      withCredentials: true,
+    });
+    return response.data || [];
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("Unauthorized: Please log in again.");
+    }
+    // Handle empty response as valid case
+    if (error.response?.status === 404 || error.response?.data?.length === 0) {
+      return [];
+    }
+    console.error("❌ Error fetching pending orders:", error);
+    throw new Error("Failed to fetch pending orders");
+  }
+};
+
+const deleteOrder = async (id) => {
+  await axios.delete(`http://localhost:8800/server/order/deleteOrder/${id}`, {
+    withCredentials: true,
+  });
+};
+
 const Ordersf = () => {
-  // Data for the table
-  const data = [
-    { id: 1, first: 'Mark', last: 'Otto', handle: '@mdo' },
-    { id: 2, first: 'Jacob', last: 'Thornton', handle: '@fat' },
-    { id: 3, first: 'Jacob', last: 'Thornton', handle: '@fat' }
-  ];
+  const [pendingPage, setPendingPage] = useState(1);
+  const [approvedPage, setApprovedPage] = useState(1);
+  const queryClient = useQueryClient();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10; 
+  // Separate queries for pending and all orders
+  const {
+    data: pendingData = [],
+    isError: isPendingError,
+    error: pendingError,
+    isLoading: isPendingLoading
+  } = useQuery({
+    queryKey: ["pendingOrders"],
+    queryFn: fetchPendingOrders,
+  });
 
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  const {
+    data: allData = [],
+    isError: isAllError,
+    error: allError,
+    isLoading: isAllLoading
+  } = useQuery({
+    queryKey: ["allOrders"],
+    queryFn: fetchOrders,
+  });
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Mutations with dual invalidation
+  const { mutate: deleteOrderMutation, isLoading: isDeleting } = useMutation({
+    mutationFn: deleteOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pendingOrders"]);
+      queryClient.invalidateQueries(["allOrders"]);
+      alert("Order deleted successfully!");
+    },
+    onError: (error) => {
+      console.error("Error deleting order:", error);
+      alert(error.message);
+    },
+  });
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  // Pending Orders Pagination
+  const pendingRowsPerPage = 10;
+  const pendingTotalPages = Math.ceil(pendingData.length / pendingRowsPerPage);
+  const pendingCurrentRows = pendingData.slice(
+    (pendingPage - 1) * pendingRowsPerPage,
+    pendingPage * pendingRowsPerPage
+  );
 
+  // Approved/Rejected Orders Pagination
+  const approvedRowsPerPage = 10;
+  const filteredApprovedData = allData.filter(order => order.status !== "Pending");
+  const approvedTotalPages = Math.ceil(filteredApprovedData.length / approvedRowsPerPage);
+  const approvedCurrentRows = filteredApprovedData.slice(
+    (approvedPage - 1) * approvedRowsPerPage,
+    approvedPage * approvedRowsPerPage
+  );
+  console.log(pendingCurrentRows)
   return (
     <>
+      {/* Pending Orders Section */}
       <div className="m-4 mx-auto mx-lg-5 p-5" style={{ maxHeight: '90vh' }}>
-      <div className="d-flex justify-content-center mb-1 text-light">
-          <h2>Pending Orders</h2>
+        <div className="d-flex justify-content-center text-white mb-2">
+          <h1>Pending Orders List</h1>
         </div>
         <div className="d-flex justify-content-end mb-2">
-          <Link to="/addorder"><button className="btn btn-success bi bi-plus">Add Order</button>
-          </Link>
-        </div>
+        <Link to="/addOrder">
+          <button className="btn btn-success">
+            <i className="bi bi-plus"></i> Add Order
+          </button>
+        </Link>
+      </div>
         <div className="table-responsive">
           <table className="table table-striped">
             <thead className="bg-dark">
@@ -39,69 +124,82 @@ const Ordersf = () => {
                 <th scope="col">Farmer Phone</th>
                 <th scope="col">Crop Bought</th>
                 <th scope="col">Quantity</th>
-                <th scope='col'>Total Price</th>
                 <th scope="col">Ordered Date</th>
-                <th scope="col">Approval</th>
                 <th scope="col">Action</th>
+                <th scope="col">Delete</th>
               </tr>
             </thead>
             <tbody>
-              {currentRows.map((row) => (
-                <tr key={row.id}>
-                  <th scope="row">{row.id}</th>
-                  <td>{row.first}</td>
-                  <td>{row.last}</td>
-                  <td>{row.last}</td>
-                  <td>{row.handle}</td>
-                  <td>{row.handle}</td>
-                  <td>{row.handle}</td>
-                  <td>
-                    <div className="d-flex flex-row flex-sm-row justify-content-start">
-                    <button className="btn btn-success btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">
-                     Accept
+              {isPendingLoading ? (
+                <tr><td colSpan="12">Loading...</td></tr>
+              ) : isPendingError ? (
+                <tr><td colSpan="12">Error: {pendingError.message}</td></tr>
+              ) : pendingCurrentRows.length > 0 ? (
+                pendingCurrentRows.map((row, index) => (
+                  <tr key={row.id}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{row.seller_first_name} {row.seller_last_name}</td>
+                    <td>{row.seller_phone}</td>
+                    <td>{row.crop_name}</td>
+                    <td>{row.quantity}</td>
+                    <td>{row.created_at ? format(new Date(row.created_at), "MMM dd, yyyy") : "N/A"}</td>
+                    <td>
+                    <span className="badge bg-warning h-100">Pending</span>
+                    </td>
+
+                    <td>
+                      <button
+                        onClick={() => deleteOrderMutation(row.id)}
+                        className="btn btn-danger btn-sm mb-2 mb-sm-0"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                       </button>
-                      <button className="btn btn-secondary btn-sm mb-2 mb-sm-0">
-                        Reject
-                      </button>
-                    </div>
-                  </td>
-                  <td scope='col'>
-                  <Link to="/editorder"><button className="btn btn-primary btn-sm mb-2 mb-sm-0 me-2 bi bi-pencil">Edit</button>
-                  </Link>
-                    <button className="btn btn-danger btn-sm">Delete</button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="12" className="text-center">No Pending Orders found.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Pagination controls */}
         <nav>
           <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => paginate(currentPage - 1)}>
+            <li className={`page-item ${pendingPage === 1 ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setPendingPage(p => p - 1)}
+              >
                 Previous
               </button>
             </li>
-            {[...Array(totalPages).keys()].map((num) => (
-              <li key={num} className={`page-item ${currentPage === num + 1 ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => paginate(num + 1)}>
+            {[...Array(pendingTotalPages).keys()].map(num => (
+              <li key={num} className={`page-item ${pendingPage === num + 1 ? 'active' : ''}`}>
+                <button 
+                  className="page-link" 
+                  onClick={() => setPendingPage(num + 1)}
+                >
                   {num + 1}
                 </button>
               </li>
             ))}
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => paginate(currentPage + 1)}>
+            <li className={`page-item ${pendingPage === pendingTotalPages ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setPendingPage(p => p + 1)}
+              >
                 Next
               </button>
             </li>
           </ul>
         </nav>
       </div>
+
+      {/* Approved/Rejected Orders Section */}
       <div className="m-4 mx-auto mx-lg-5 p-5" style={{ maxHeight: '90vh' }}>
         <div className="d-flex justify-content-center mb-2">
-         <h1 style={{fontWeight:"bold",color:"white"}}>Recent Orders</h1>
+          <h1 style={{fontWeight:"bold",color:"white"}}>Approved & Rejected Orders</h1>
         </div>
         <div className="table-responsive">
           <table className="table table-striped">
@@ -112,56 +210,81 @@ const Ordersf = () => {
                 <th scope="col">Farmer Phone</th>
                 <th scope="col">Crop Bought</th>
                 <th scope="col">Quantity</th>
-                <th scope='col'>Total Price</th>
+                <th scope="col">Total Price</th>
                 <th scope="col">Ordered Date</th>
-                <th scope='col'>Status</th>
+                <th scope="col">Status</th>
                 <th scope="col">Action</th>
               </tr>
             </thead>
             <tbody>
-              {currentRows.map((row) => (
-                <tr key={row.id}>
-                  <th scope="row">{row.id}</th>
-                  <td>{row.first}</td>
-                  <td>{row.last}</td>
-                  <td>{row.handle}</td>
-                  <td>{row.handle}</td>
-                  <td>{row.handle}</td>
-                  <td>{row.handle}</td>
-                  <td>
-                  <span className="badge bg-success fs-6">Approved</span>
-                  <span className="badge bg-danger fs-6">Rejected</span>                   
-                  </td>
-                  <td>
-                    <div className="d-flex flex-row flex-sm-row justify-content-start">
-                    <button className="btn btn-danger btn-sm me-2 mb-2 mb-sm-0 w-sm-auto">
-                     Delete
+              {isAllLoading ? (
+                <tr><td colSpan="12">Loading...</td></tr>
+              ) : isAllError ? (
+                <tr><td colSpan="12">Error: {allError.message}</td></tr>
+              ) : approvedCurrentRows.length > 0 ? (
+                approvedCurrentRows.map((row, index) => (
+                  <tr key={row.id}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{row.seller_first_name} {row.seller_last_name}</td>
+                    <td>{row.seller_phone}</td>
+                    <td>{row.crop_name}</td>
+                    <td>{row.quantity}</td>
+                    <td>{row.total_price || "N/A"}</td>
+                    <td>{row.created_at ? format(new Date(row.created_at), "MMM dd, yyyy") : "N/A"}</td>
+                    <td>
+                      {(() => {
+                        switch (row.status) {
+                          case "Approved":
+                            return <span className="badge bg-success">Approved</span>;
+                          case "Rejected":
+                            return <span className="badge bg-danger">Rejected</span>;
+                          default:
+                            return <span className="badge bg-warning">Pending</span>;
+                        }
+                      })()}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => deleteOrderMutation(row.id)}
+                        className="btn btn-danger btn-sm mb-2 mb-sm-0"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                       </button>
-                    </div>
-                  </td>
+                    </td>
                   </tr>
-              ))}
+                ))
+              ) : (
+                <tr><td colSpan="12" className="text-center">No Approved/Rejected Orders found.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Pagination controls */}
         <nav>
           <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => paginate(currentPage - 1)}>
+            <li className={`page-item ${approvedPage === 1 ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setApprovedPage(p => p - 1)}
+              >
                 Previous
               </button>
             </li>
-            {[...Array(totalPages).keys()].map((num) => (
-              <li key={num} className={`page-item ${currentPage === num + 1 ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => paginate(num + 1)}>
+            {[...Array(approvedTotalPages).keys()].map(num => (
+              <li key={num} className={`page-item ${approvedPage === num + 1 ? 'active' : ''}`}>
+                <button 
+                  className="page-link" 
+                  onClick={() => setApprovedPage(num + 1)}
+                >
                   {num + 1}
                 </button>
               </li>
             ))}
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => paginate(currentPage + 1)}>
+            <li className={`page-item ${approvedPage === approvedTotalPages ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setApprovedPage(p => p + 1)}
+              >
                 Next
               </button>
             </li>

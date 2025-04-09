@@ -2,39 +2,47 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import http from "http";
+import path from "path";
 import { db } from "./connectdb.js";
 import cropRoute from "./routes/Crops.js";
-import notificationRoute from "./routes/Notifacation.js"; // ✅ Fixed spelling!
+import notificationRoute from "./routes/Notifacation.js";
 import orderRoute from "./routes/Orders.js";
 import userRoute from "./routes/User.js";
+import { initializeSocket } from "./socket.js";
 
 const app = express();
+const server = http.createServer(app);
 
-// ✅ Middleware (Order matters!)
-app.use(cookieParser()); // ✅ Parse cookies before anything else
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true, // ✅ Allow frontend to send cookies
-}));
-app.use(express.json()); // ✅ Ensure JSON parsing
+// Middleware
+app.use(cookieParser());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(express.json());
 app.use(bodyParser.json());
 
-// ✅ Routes
+// Serve profile images
+const profilePath = path.join(process.cwd(), "client/public/profile");
+app.use("/profile", express.static(profilePath));
+
+// Routes
 app.use("/server/user", userRoute);
 app.use("/server/crop", cropRoute);
 app.use("/server/notification", notificationRoute);
 app.use("/server/order", orderRoute);
 
-// ✅ Database Connection
+// Initialize Socket.io
+initializeSocket(server);
+
+// Database Connection
 db.connect((err) => {
     if (err) {
-        console.log("❌ Failed to connect to the database:", err);
+        console.error("❌ Database connection failed:", err);
     } else {
         console.log("✅ Connected to the database");
     }
 });
 
-// ✅ Start Server
-app.listen(8800, () => {
-    console.log("🚀 Server is running on port 8800");
+// Start Server
+server.listen(8800, () => {
+    console.log("🚀 Server running on port 8800");
 });
