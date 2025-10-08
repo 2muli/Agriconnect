@@ -40,30 +40,37 @@ export const addNotification = async (req, res) => {
 };
 
 export const getMyNotifications = async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Unauthorized: No user information found" });
-  }
-
-  const userId = req.user.id;
-  const q = `
-    SELECT notification.*, 
-           sender.first_name AS sender_first_name, 
-           sender.last_name AS sender_last_name,
-           DATE_FORMAT(notification.created_at, '%Y-%m-%d %H:%i:%s') AS created_at
-    FROM notification
-    LEFT JOIN users AS sender ON notification.sender_id = sender.id
-    WHERE notification.receiver_id = ? OR notification.sender_id = ?
-    ORDER BY notification.created_at DESC
-  `;
-
-  db.query(q, [userId, userId], (err, result) => {
-    if (err) {
-      console.error("❌ Error fetching notifications:", err);
-      return res.status(500).json({ message: "Internal server error" });
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: No user information found" });
     }
-    return res.status(200).json(result);
-  });
-};
+  
+    const userId = req.user.id;
+    const q = `
+      SELECT 
+        n.*, 
+        s.first_name AS sender_first_name, 
+        s.last_name AS sender_last_name,
+        s.phone_number AS sender_phone,
+        r.first_name AS receiver_first_name, 
+        r.last_name AS receiver_last_name,
+        r.phone_number AS receiver_phone,
+        DATE_FORMAT(n.created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+      FROM notification n
+      LEFT JOIN users AS s ON n.sender_id = s.id
+      LEFT JOIN users AS r ON n.receiver_id = r.id
+      WHERE n.receiver_id = ? OR n.sender_id = ?
+      ORDER BY n.created_at DESC
+    `;
+  
+    db.query(q, [userId, userId], (err, result) => {
+      if (err) {
+        console.error("❌ Error fetching notifications:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+      return res.status(200).json(result);
+    });
+  };
+  
 
 
 export const updateNotification = async (req, res) => {

@@ -46,7 +46,7 @@ const Notification = () => {
     staleTime: 300,
     retry: false,
   });
-  
+  console.log(notifications)
   const { mutate: handleDelete, isLoading: isDeleting } = useMutation({
     mutationFn: deleteNotification,
     onSuccess: (deletedId) => {
@@ -75,7 +75,6 @@ const Notification = () => {
       <span className="text-danger">Network error! Retry later.</span>
     );
   }
-console.log(currentRows)
   return (
     <div className="m-4 mx-auto p-5" style={{ maxHeight: "90vh" }}>
       <div className="d-flex justify-content-center mb-2 text-white">

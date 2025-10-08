@@ -67,12 +67,12 @@ const Sidebar = ({ isSidebarOpen }) => {
               </Link>
             </li>
 
-            <li className='nav-item'>
+           {!isFarmer && <li className='nav-item'>
               <Link to={isFarmer ? "/earning" : "/transaction"} className='nav-link'>
-                <i className="bi bi-cash"></i>
-                <span>{isFarmer ? "Earnings" : "Transactions"}</span>
+               <i className="bi bi-cash"></i>
+                <span>Transactions</span>
               </Link>
-            </li>
+            </li>}
 
             <li className='nav-item'>
               <Link to="/notification" className='nav-link'>

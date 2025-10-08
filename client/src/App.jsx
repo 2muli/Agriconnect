@@ -52,207 +52,211 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Layout />
         <Routes>
-          {/* Public Routes */}
-          <Route path="*" element={<Error />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/faq" element={<Faq />} />
-          <Route path="/contact" element={<Contact />} />
+          {/* Layout Wrapper */}
+          <Route path="/" element={<Layout />}>
+            {/* Public Routes */}
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+            <Route path="help" element={<Help />} />
+            <Route path="faq" element={<Faq />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editProfile"
-            element={
-              <ProtectedRoute>
-                <EditProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/changePassword"
-            element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected Routes */}
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="editProfile"
+              element={
+                <ProtectedRoute>
+                  <EditProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="changePassword"
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Buyer Routes */}
-          <Route
-            path="/bdashboard"
-            element={
-              <ProtectedRoute>
-                <BuyerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/produceb"
-            element={
-              <ProtectedRoute>
-                <Produceb />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/ordersf"
-            element={
-              <ProtectedRoute>
-                <Ordersf />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/transaction"
-            element={
-              <ProtectedRoute>
-                <Transactions />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addorder"
-            element={
-              <ProtectedRoute>
-                <AddOrder />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editorder"
-            element={
-              <ProtectedRoute>
-                <EditOrder />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addtransaction"
-            element={
-              <ProtectedRoute>
-                <AddTransaction />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/edittransaction"
-            element={
-              <ProtectedRoute>
-                <EditTransaction />
-              </ProtectedRoute>
-            }
-          />
+            {/* Buyer Routes */}
+            <Route
+              path="bdashboard"
+              element={
+                <ProtectedRoute>
+                  <BuyerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="produceb"
+              element={
+                <ProtectedRoute>
+                  <Produceb />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="ordersf"
+              element={
+                <ProtectedRoute>
+                  <Ordersf />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="transaction"
+              element={
+                <ProtectedRoute>
+                  <Transactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="addorder"
+              element={
+                <ProtectedRoute>
+                  <AddOrder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="editorder"
+              element={
+                <ProtectedRoute>
+                  <EditOrder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="addtransaction"
+              element={
+                <ProtectedRoute>
+                  <AddTransaction />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="edittransaction/:id"
+              element={
+                <ProtectedRoute>
+                  <EditTransaction />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Farmer Routes */}
-          <Route
-            path="/fdashboard"
-            element={
-              <ProtectedRoute>
-                <FarmerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/produce"
-            element={
-              <ProtectedRoute>
-                <Produce />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/earning"
-            element={
-              <ProtectedRoute>
-                <Earning />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notification"
-            element={
-              <ProtectedRoute>
-                <Notification />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/education"
-            element={
-              <ProtectedRoute>
-                <Education />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addearning"
-            element={
-              <ProtectedRoute>
-                <AddEarning />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editearning"
-            element={
-              <ProtectedRoute>
-                <EditEarning />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addnotification"
-            element={
-              <ProtectedRoute>
-                <AddNotification />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editnotification/:id"
-            element={
-              <ProtectedRoute>
-                <EditNotification />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addproduce"
-            element={
-              <ProtectedRoute>
-                <AddProduce />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editproduce/:id"
-            element={
-              <ProtectedRoute>
-                <EditProduce />
-              </ProtectedRoute>
-            }
-          />
+            {/* Farmer Routes */}
+            <Route
+              path="fdashboard"
+              element={
+                <ProtectedRoute>
+                  <FarmerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="produce"
+              element={
+                <ProtectedRoute>
+                  <Produce />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="earning"
+              element={
+                <ProtectedRoute>
+                  <Earning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="notification"
+              element={
+                <ProtectedRoute>
+                  <Notification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="education"
+              element={
+                <ProtectedRoute>
+                  <Education />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="addearning"
+              element={
+                <ProtectedRoute>
+                  <AddEarning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="editearning"
+              element={
+                <ProtectedRoute>
+                  <EditEarning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="addnotification"
+              element={
+                <ProtectedRoute>
+                  <AddNotification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="editnotification/:id"
+              element={
+                <ProtectedRoute>
+                  <EditNotification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="addproduce"
+              element={
+                <ProtectedRoute>
+                  <AddProduce />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="editproduce/:id"
+              element={
+                <ProtectedRoute>
+                  <EditProduce />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Error Route */}
+            <Route path="*" element={<Error />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

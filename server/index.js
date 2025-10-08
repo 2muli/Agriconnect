@@ -8,9 +8,9 @@ import { db } from "./connectdb.js";
 import cropRoute from "./routes/Crops.js";
 import notificationRoute from "./routes/Notifacation.js";
 import orderRoute from "./routes/Orders.js";
+import transactionRoute from './routes/Transaction.js';
 import userRoute from "./routes/User.js";
 import { initializeSocket } from "./socket.js";
-
 const app = express();
 const server = http.createServer(app);
 
@@ -29,6 +29,7 @@ app.use("/server/user", userRoute);
 app.use("/server/crop", cropRoute);
 app.use("/server/notification", notificationRoute);
 app.use("/server/order", orderRoute);
+app.use('/server/transaction',transactionRoute)
 
 // Initialize Socket.io
 initializeSocket(server);
