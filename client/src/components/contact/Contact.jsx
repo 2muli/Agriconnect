@@ -1,7 +1,41 @@
 // Contact.jsx
-import "./contact.css"; // Import CSS for styling
+import axios from "axios";
+import { useState } from "react";
+import "./contact.css";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus("Sending...");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8800/server/contact/sendMessage",
+        formData
+      );
+
+      if (response.status === 200) {
+        setStatus("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setStatus("❌ Failed to send message. Try again later.");
+    }
+  };
+
   return (
     <div className="contact-container">
       <h1>Contact Us</h1>
@@ -14,11 +48,7 @@ const Contact = () => {
       <div className="contact-options">
         {/* Phone */}
         <div className="contact-card">
-          <img
-            src="images/whatApp.png"
-            alt="Call Icon"
-            className="contact-icon"
-          />
+          <img src="images/whatApp.png" alt="Call Icon" className="contact-icon" />
           <h3>Call Us</h3>
           <p>
             <a href="tel:+254-792079900" className="contact-link">
@@ -29,11 +59,7 @@ const Contact = () => {
 
         {/* Email */}
         <div className="contact-card">
-          <img
-            src="images/email.png"
-            alt="Email Icon"
-            className="contact-icon"
-          />
+          <img src="images/email.png" alt="Email Icon" className="contact-icon" />
           <h3>Email Us</h3>
           <p>
             <a href="mailto:info@agriconnect.com" className="contact-link">
@@ -44,11 +70,7 @@ const Contact = () => {
 
         {/* Facebook */}
         <div className="contact-card">
-          <img
-            src="images/fb.jpg"
-            alt="Facebook Icon"
-            className="contact-icon"
-          />
+          <img src="images/fb.jpg" alt="Facebook Icon" className="contact-icon" />
           <h3>Follow on Facebook</h3>
           <p>
             <a
@@ -64,11 +86,7 @@ const Contact = () => {
 
         {/* Twitter */}
         <div className="contact-card">
-          <img
-            src="images/twitter.png"
-            alt="Twitter Icon"
-            className="contact-icon"
-          />
+          <img src="images/twitter.png" alt="Twitter Icon" className="contact-icon" />
           <h3>Follow on Twitter</h3>
           <p>
             <a
@@ -82,11 +100,11 @@ const Contact = () => {
           </p>
         </div>
       </div>
-
-      {/* Contact Form (Optional) */}
+      {status && <p className="mt-3 text-center">{status}</p>}
+      {/* Contact Form */}
       <div className="contact-form">
         <h2>Send Us a Message</h2>
-        <form>
+        <form onSubmit={handleSubmit}>
           <label htmlFor="name">Name:</label>
           <input
             type="text"
@@ -94,6 +112,8 @@ const Contact = () => {
             name="name"
             required
             placeholder="Enter your name"
+            value={formData.name}
+            onChange={handleChange}
           />
 
           <label htmlFor="email">Email:</label>
@@ -103,6 +123,8 @@ const Contact = () => {
             name="email"
             required
             placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
           />
 
           <label htmlFor="message">Message:</label>
@@ -112,6 +134,8 @@ const Contact = () => {
             rows="5"
             required
             placeholder="Write your message here"
+            value={formData.message}
+            onChange={handleChange}
           ></textarea>
 
           <button type="submit">Submit</button>

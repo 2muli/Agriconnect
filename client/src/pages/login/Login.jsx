@@ -21,7 +21,6 @@ const Login = () => {
       setError("All fields must be filled!");
       return;
     }
-
     try {
       await login(inputs);
       const user = JSON.parse(Cookies.get("user") || "{}");
@@ -77,7 +76,7 @@ const Login = () => {
                     </button>
                   </div>
                   <div className="text-center">
-                    <a className="text-muted small" href="#">Forgot password?</a>
+                    <Link to="/reset-password" className="text-muted small">Forgot password?</Link>
                   </div>
                   <div className="d-flex align-items-center justify-content-center mt-4">
                     <p className="mb-0 me-2 text-muted">Don't have an account?</p>

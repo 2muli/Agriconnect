@@ -31,9 +31,7 @@ const uploadPromise = (req, res) =>
     upload(req, res, (err) => (err ? reject(err) : resolve()));
   });
 
-/** ============================
- *  🚀 Register New User
- ============================= */
+/** Register New User */
 export const register = async (req, res) => {
   try {
     await uploadPromise(req, res);
@@ -81,9 +79,7 @@ export const register = async (req, res) => {
   }
 };
 
-/** ============================
- *  🔑 User Login
- ============================= */
+/** User Login */
 export const login = async (req, res) => {
   try {
     const { phone_number, email, password } = req.body;
@@ -114,8 +110,8 @@ export const login = async (req, res) => {
     // Set HTTP-Only Cookie
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: false, // ❌ Change from true → false for local development
-      sameSite: "Lax", // ✅ Change from "None" → "Lax" for local development
+      secure: false, //  Change from true → false for local development
+      sameSite: "Lax", // Change from "None" → "Lax" for local development
     });
 
     const { password: _, ...otherDetails } = user;
@@ -127,9 +123,7 @@ export const login = async (req, res) => {
   }
 };
 
-/** ============================
- *  🔍 Fetch Logged-In User Details
- ============================= */
+/** Fetch Logged-In User Details */
 export const LoggedUserDetails = async (req, res) => {
   try {
       const token = req.cookies.access_token;
@@ -141,7 +135,7 @@ export const LoggedUserDetails = async (req, res) => {
 
       db.query("SELECT * FROM users WHERE id = ?", [decoded.id], (err, result) => {
           if (err) {
-              console.error("❌ Error fetching user:", err);
+              console.error("Error fetching user:", err);
               return res.status(500).json({ message: "An error occurred!" });
           }
           if (result.length === 0) {
@@ -152,14 +146,12 @@ export const LoggedUserDetails = async (req, res) => {
           return res.status(200).json({ details: otherDetails });
       });
   } catch (error) {
-      console.error("❌ Unexpected error in LoggedUserDetails:", error);
+      console.error("Unexpected error in LoggedUserDetails:", error);
       return res.status(500).json({ message: "An error occurred!" });
   }
 };
 
-/** ============================
- *  🚪 Logout User
- ============================= */
+/** Logout User */
 export const logout = (req, res) => {
   try {
     if (!req.cookies.access_token) {
@@ -181,11 +173,9 @@ export const logout = (req, res) => {
   }
 };
 
-/** ============================
- *  🛡️ Verify Token Middleware
- ============================= */
+/** Verify Token Middleware */
 export const verifyToken = (req, res, next) => {
-  const token = req.cookies?.access_token; // ✅ Use optional chaining to prevent errors
+  const token = req.cookies?.access_token; //Use optional chaining to prevent errors
 
   if (!token) {
       return res.status(401).json({ message: "Unauthorized: No authentication token found" });
@@ -195,13 +185,13 @@ export const verifyToken = (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       db.query("SELECT id, phone_number, role FROM users WHERE id = ?", [decoded.id], (err, result) => {
           if (err) {
-              console.error("❌ Database Error:", err);
+              console.error(" Database Error:", err);
               return res.status(500).json({ message: "Internal server error" });
           }
           if (result.length === 0) {
               return res.status(403).json({ message: "Invalid user" });
           }
-          req.user = result[0]; // ✅ Attach user data to request
+          req.user = result[0]; //Attach user data to request
           next();
       });
   } catch (error) {
@@ -234,6 +224,7 @@ export const getFarmers = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+/** Update Profile */
 export const updateProfile = (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized: You cannot change someone else's account!" });
@@ -338,5 +329,31 @@ export const changePassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+export const resetPasswordWithToken = async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || typeof newPassword !== "string") {
+    return res.status(400).json({ error: "New password is required" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const [result] = await db.query(
+      "UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ? AND reset_token_expiry > NOW()",
+      [hashedPassword, token]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    return res.status(200).json({ success: true, message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ error: "Failed to reset password" });
   }
 };

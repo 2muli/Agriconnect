@@ -89,11 +89,11 @@ const BuyerDashboard = () => {
     <div className="container mt-4">
       {/* Header Section */}
       <div className="mb-4">
-        <h1 className="text-primary">Farmer Dashboard</h1>
+        <h1 className="text-primary">Buyer Dashboard</h1>
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/fdashboard">Home</Link>
+              <Link to="/bdashboard">Home</Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
               Dashboard

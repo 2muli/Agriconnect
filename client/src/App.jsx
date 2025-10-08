@@ -47,6 +47,8 @@ import AddProduce from "./components/farmerdashboard/farmercrud/AddProduce";
 import EditEarning from "./components/farmerdashboard/farmercrud/EditEarning";
 import EditNotification from "./components/farmerdashboard/farmercrud/EditNotification";
 import EditProduce from "./components/farmerdashboard/farmercrud/EditProduce";
+import ChangeForgotenPassword from "./pages/ChangeForgotenPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -57,12 +59,14 @@ function App() {
           <Route path="/" element={<Layout />}>
             {/* Public Routes */}
             <Route index element={<Home />} />
+            <Route path="reset-password" element={<ResetPassword />} />
             <Route path="about" element={<About />} />
             <Route path="help" element={<Help />} />
             <Route path="faq" element={<Faq />} />
             <Route path="contact" element={<Contact />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="change-forgotten-password/:token" element={<ChangeForgotenPassword />} />
 
             {/* Protected Routes */}
             <Route
